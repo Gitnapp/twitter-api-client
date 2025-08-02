@@ -108,6 +108,29 @@ class Account:
                 self.logger.debug(f"{RED}Failed to send DM(s) to {receivers}{RESET}")
         return res
 
+    def dm_mark_read(self, conversation_id: str, last_read_event_id: str) -> dict:
+        """
+        Mark a DM conversation as read
+        
+        @param conversation_id: The conversation ID (format: user1_id-user2_id)
+        @param last_read_event_id: The ID of the last read event/message
+        @return: response
+        """
+        params = {
+            'conversationId': conversation_id,
+            'last_read_event_id': last_read_event_id
+        }
+        headers = get_headers(self.session)
+        headers['content-type'] = 'application/x-www-form-urlencoded'
+        url = f'{self.v1_api}/dm/conversation/{conversation_id}/mark_read.json'
+        r = self.session.post(url, headers=headers, data=urlencode(params))
+        if self.debug:
+            log(self.logger, self.debug, r)
+        # 204响应无内容，返回空dict
+        if r.status_code == 204:
+            return {}
+        return r.json()
+
     def tweet(self, text: str, *, media: any = None, **kwargs) -> dict:
         variables = {
             'tweet_text': text,
